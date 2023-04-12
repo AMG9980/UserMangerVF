@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="UserManagerDesk2">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/dist/UserManagerDesk2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
