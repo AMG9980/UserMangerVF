@@ -5,9 +5,9 @@
  */
 package tn.esprit.Service;
 
-import tn.esprit.Tools.DbConnect;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import java.io.IOException;
-
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
@@ -21,7 +21,6 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -37,15 +36,17 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import tn.esprit.Entities.Role;
 import tn.esprit.Entities.User;
+import tn.esprit.Entities.MyClassIcon;
+import tn.esprit.Tools.DbConnect;
 
 public class UserViewController implements Initializable {
 
@@ -70,7 +71,7 @@ public class UserViewController implements Initializable {
     private TableColumn<User, List<Role>> rolesColumn;
 
     @FXML
-    private TableColumn<User, User> editColumn;
+    private TableColumn<User, User> editDeleteColumn;
 
     @FXML
     private TableColumn<User, User> deleteColumn;
@@ -105,98 +106,85 @@ public class UserViewController implements Initializable {
         });
 
         // Add edit and delete buttons to each row
-        editColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
-        editColumn.setCellFactory(param -> new TableCell<User, User>() {
-            private final Button editButton = new Button("Edit");
+        editDeleteColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
+editDeleteColumn.setCellFactory(param -> new TableCell<User, User>() {
+    MyClassIcon myClass = new MyClassIcon();
+    FontAwesomeIconView deleteIcon = myClass.getDeleteIcon();
+    FontAwesomeIconView editIcon = myClass.getEditIcon();
+    
+    @Override
+    protected void updateItem(User user, boolean empty) {
+        super.updateItem(user, empty);
+        
+        if (user == null) {
+            setGraphic(null);
+            return;
+        }
+        
+        HBox buttons = new HBox(editIcon, deleteIcon);
+        setGraphic(buttons);
+        
+        editIcon.setOnMouseClicked(event -> {
+            // Edit button action
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("/tn/esprit/GUI/AddUserView.fxml"));
+            try {
+                Parent root = loader.load();
+            } catch (IOException ex) {
+                Logger.getLogger(UserViewController.class.getName()).log(Level.SEVERE, null, ex);
+            }
 
-            @Override
-            protected void updateItem(User user, boolean empty) {
-                super.updateItem(user, empty);
+            AddUserViewController addUserController = loader.getController();
+            addUserController.setUpdate(true);
+            addUserController.setTextField(user.getId(), user.getUsername(), user.getEmail(), /*getPassword(),*/ user.getIsActive());
+            /* user.getBirth().toLocalDate(),user.getAdress(), user.getEmail());*/
+            Parent parent = loader.getRoot();
+            Stage stage = new Stage();
+            stage.setScene(new Scene(parent));
+            stage.initStyle(StageStyle.UTILITY);
 
-                if (user == null) {
-                    setGraphic(null);
-                    return;
-                }
+            Stage currentStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            currentStage.close();
 
-                setGraphic(new HBox(editButton));
-                editButton.setOnAction(event -> {
-                   // final User user = userTableView.getSelectionModel().getSelectedItem();
-                    FXMLLoader loader = new FXMLLoader();
-                    loader.setLocation(getClass().getResource("/views/AddUserView.fxml"));
-                    try {
-                        loader.load();
-                    } catch (IOException ex) {
-                        Logger.getLogger(UserViewController.class.getName()).log(Level.SEVERE, null, ex);
+            stage.show();
+        });
+        
+        deleteIcon.setOnMouseClicked(event -> {
+            // Delete button action
+            Alert alert = new Alert(AlertType.CONFIRMATION);
+            alert.setTitle("Delete User");
+            alert.setHeaderText("Are you sure you want to delete this user?");
+            alert.setContentText(user.getUsername());
+
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                try {
+                    connection = DbConnect.getConnect();
+                    String query = "DELETE FROM user WHERE id = ?";
+                    PreparedStatement preparedStatement = connection.prepareStatement(query);
+                    preparedStatement.setInt(1, user.getId());
+                    int rowsDeleted = preparedStatement.executeUpdate();
+                    if (rowsDeleted > 0) {
+                        userList.remove(user);
+                        Alert alertSuccess = new Alert(AlertType.INFORMATION);
+                        alertSuccess.setTitle("Delete User");
+                        alertSuccess.setHeaderText(null);
+                        alertSuccess.setContentText("User has been deleted successfully!");
+                        alertSuccess.showAndWait();
                     }
-
-                    AddUserViewController addUserController = loader.getController();
-                    addUserController.setUpdate(true);
-                    addUserController.setTextField(user.getId(), user.getUsername(), user.getEmail(), /*getPassword(),*/ user.getIsActive());
-                    /* user.getBirth().toLocalDate(),user.getAdress(), user.getEmail());*/
-                    Parent parent = loader.getRoot();
-                    Stage stage = new Stage();
-                    stage.setScene(new Scene(parent));
-                    stage.initStyle(StageStyle.UTILITY);
-
-                    Stage currentStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                    currentStage.close();
-
-                    stage.show();
-
-                });
-
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                    Alert alertError = new Alert(AlertType.ERROR);
+                    alertError.setTitle("Delete User");
+                    alertError.setHeaderText(null);
+                    alertError.setContentText("An error occurred while deleting the user. Please try again later.");
+                    alertError.showAndWait();
+                }
             }
         });
+    }
+});
 
-        deleteColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
-        deleteColumn.setCellFactory(param -> new TableCell<User, User>() {
-            private final Button deleteButton = new Button("Delete");
-
-            @Override
-            protected void updateItem(User user, boolean empty) {
-                super.updateItem(user, empty);
-
-                if (user == null) {
-                    setGraphic(null);
-                    return;
-                }
-
-                setGraphic(new HBox(deleteButton));
-                deleteButton.setOnAction(event -> {
-                    //  User user = getTableView().getItems().get(getIndex());
-                    Alert alert = new Alert(AlertType.CONFIRMATION);
-                    alert.setTitle("Delete User");
-                    alert.setHeaderText("Are you sure you want to delete this user?");
-                    alert.setContentText(user.getUsername());
-
-                    Optional<ButtonType> result = alert.showAndWait();
-                    if (result.isPresent() && result.get() == ButtonType.OK) {
-                        try {
-                            connection = DbConnect.getConnect();
-                            String query = "DELETE FROM user WHERE id = ?";
-                            PreparedStatement preparedStatement = connection.prepareStatement(query);
-                            preparedStatement.setInt(1, user.getId());
-                            int rowsDeleted = preparedStatement.executeUpdate();
-                            if (rowsDeleted > 0) {
-                                userList.remove(user);
-                                Alert alertSuccess = new Alert(AlertType.INFORMATION);
-                                alertSuccess.setTitle("Delete User");
-                                alertSuccess.setHeaderText(null);
-                                alertSuccess.setContentText("User has been deleted successfully!");
-                                alertSuccess.showAndWait();
-                            }
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
-                            Alert alertError = new Alert(AlertType.ERROR);
-                            alertError.setTitle("Delete User");
-                            alertError.setHeaderText(null);
-                            alertError.setContentText("An error occurred while deleting the user. Please try again later.");
-                            alertError.showAndWait();
-                        }
-                    }
-                });
-            }
-        });
 
         // Populate the table with data
         try {

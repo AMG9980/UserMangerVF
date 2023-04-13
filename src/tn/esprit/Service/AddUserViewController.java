@@ -186,57 +186,7 @@ public class AddUserViewController implements Initializable {
                     userRoleStatement.executeUpdate();
                 }
 
-                if (update == false) {
-                    //query = "INSERT INTO user (username, email, password, is_active, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())";
-
-                    // Insert the user into the user table
-                    query = "INSERT INTO user (username, email, password, is_active) VALUES (?, ?, ?, ?)";
-                    preparedStatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
-                    preparedStatement.setString(1, username);
-                    preparedStatement.setString(2, email);
-                    preparedStatement.setString(3, password);
-                    preparedStatement.setBoolean(4, isActive);
-                    preparedStatement.executeUpdate();
-
-                    // Get the ID of the newly inserted user
-                    ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
-                    if (generatedKeys.next()) {
-                        userId = generatedKeys.getInt(1);
-                    } else {
-                        throw new SQLException("Failed to insert user, no ID obtained.");
-                    }
-
-                    // Insert the user role into the user_role table
-                    String userRoleQuery = "INSERT INTO user_role (user_id, role_id) VALUES (?, ?)";
-                    PreparedStatement userRoleStatement = connection.prepareStatement(userRoleQuery);
-                    userRoleStatement.setInt(1, userId);
-                    userRoleStatement.setInt(2, roleId);
-                    userRoleStatement.executeUpdate();
-                } else {
-                    query = "UPDATE user SET username=?, email=?, password=?, is_active=? WHERE id=?";
-                    preparedStatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
-                    preparedStatement.setString(1, username);
-                    preparedStatement.setString(2, email);
-                    preparedStatement.setString(3, password);
-                    preparedStatement.setBoolean(4, isActive);
-                    preparedStatement.executeUpdate();
-
-                    // Get the ID of the newly inserted user
-                    ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
-                    if (generatedKeys.next()) {
-                        userId = generatedKeys.getInt(1);
-                    } else {
-                        throw new SQLException("Failed to insert user, no ID obtained.");
-                    }
-
-                    // Insert the user role into the user_role table
-                    String userRoleQuery = "INSERT INTO user_role (user_id, role_id) VALUES (?, ?)";
-                    PreparedStatement userRoleStatement = connection.prepareStatement(userRoleQuery);
-                    userRoleStatement.setInt(1, userId);
-                    userRoleStatement.setInt(2, roleId);
-                    userRoleStatement.executeUpdate();
-
-                }
+               
 
             } catch (SQLException ex) {
                 Logger.getLogger(AddUserViewController.class.getName()).log(Level.SEVERE, null, ex);
