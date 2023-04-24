@@ -14,21 +14,24 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
+import tn.esprit.Entities.FXMLUtils;
 
 public class AddRoleController implements Initializable {
 
     @FXML
     private TextField nomFld;
 
+    @FXML
+    private Label text1;
+    
+    
     String query = null;
     Connection connection = null;
     ResultSet resultSet = null;
@@ -40,10 +43,11 @@ public class AddRoleController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
+        //text1.setText("Add");
     }
 
     @FXML
-    private void save(MouseEvent event) throws IOException {
+    private void save(MouseEvent event) throws IOException, Exception {
         connection = DbConnect.getConnect();
         String nom = nomFld.getText();
 
@@ -66,25 +70,34 @@ public class AddRoleController implements Initializable {
             }
         }
 
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        stage.close();
+
+        FXMLUtils fxmlUtils = new FXMLUtils();
+        fxmlUtils.loadFXML("/tn/esprit/GUI/AddRole.fxml", "tn/esprit/Service/AddRoleController");
+        
+        /*
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/tn/esprit/GUI/RoleView.fxml"));
         Parent root = loader.load();
         Scene scene = new Scene(root);
         Stage primaryStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         primaryStage.setScene(scene);
         primaryStage.show();
-
-        
+         */
     }
 
     @FXML
     private void cancel(MouseEvent event) throws IOException {
-        nomFld.setText(null);
+
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        stage.close();
+
+        /*nomFld.setText(null);
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/tn/esprit/GUI/RoleView.fxml"));
         Parent root = loader.load();
         Scene scene = new Scene(root);
         Stage primaryStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        primaryStage.setScene(s*/
     }
 
     private void getQuery() {

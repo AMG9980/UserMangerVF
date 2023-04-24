@@ -27,10 +27,10 @@ import tn.esprit.*;
  */
 public class UserManagerDesk2 extends Application {
 
-    @Override
+   /* @Override
     public void start(Stage primaryStage) {
         try {
-            Parent parent = FXMLLoader.load(getClass().getResource("/tn/esprit/GUI/UserView.fxml"));
+            Parent parent = FXMLLoader.load(getClass().getResource("/tn/esprit/GUI/dashboard.fxml"));
             Scene scene = new Scene(parent);
             scene.setFill(Color.TRANSPARENT);
             primaryStage.setScene(scene);
@@ -41,7 +41,18 @@ public class UserManagerDesk2 extends Application {
             Logger.getLogger(UserManagerDesk2.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+*/
+    
+    
+    @Override
+    public void start(Stage stage) throws Exception {
+        Parent root = FXMLLoader.load(getClass().getResource("/tn/esprit/GUI/Login.fxml"));
+        
+        Scene scene = new Scene(root);
+        
+        stage.setScene(scene);
+        stage.show();
+    }
     /**
      * @param args the command line arguments
      */

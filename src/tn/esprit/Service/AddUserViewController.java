@@ -33,6 +33,7 @@ import java.util.regex.Pattern;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
+import tn.esprit.Entities.FXMLUtils;
 
 /**
  * FXML Controller class
@@ -41,6 +42,7 @@ import javafx.scene.control.TextField;
  */
 public class AddUserViewController implements Initializable {
 
+    private UserViewController userViewController;
     @FXML
     private TextField usernameFld;
     @FXML
@@ -90,7 +92,7 @@ public class AddUserViewController implements Initializable {
 
     @FXML
 
-    private void save(MouseEvent event) throws IOException {
+    private void save(MouseEvent event) throws IOException, Exception {
 
         connection = DbConnect.getConnect();
 
@@ -138,84 +140,90 @@ public class AddUserViewController implements Initializable {
                     alert.showAndWait();
                     return;
                 }
-
                 // Encoder le mot de passe
-                String encodedPassword = Base64.getEncoder().encodeToString(password.getBytes());
 
-                if (update == false) {
-                    // Insérer l'utilisateur dans la table utilisateur
-                    query = "INSERT INTO user (username, email, password, is_active) VALUES (?, ?, ?, ?)";
-                    preparedStatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
-                    preparedStatement.setString(1, username);
-                    preparedStatement.setString(2, email);
-                    preparedStatement.setString(3, encodedPassword);
-                    preparedStatement.setBoolean(4, isActive);
-                    preparedStatement.executeUpdate();
+                if (password == null || password.length() < 5) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setHeaderText(null);
+                    alert.setContentText("Password must be at least 5 characters long.");
+                    alert.showAndWait();
+                    return;
+                }
+            
 
-                    // Obtenir l'ID du nouvel utilisateur inséré
-                    ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
-                    if (generatedKeys.next()) {
-                        userId = generatedKeys.getInt(1);
-                    } else {
-                        throw new SQLException("Failed to insert user, no ID obtained.");
-                    }
+          //  String encodedPassword = Base64.getEncoder().encodeToString(password.getBytes());
 
-                    // Insérer le rôle utilisateur dans la table user_role
-                    String userRoleQuery = "INSERT INTO user_role (user_id, role_id) VALUES (?, ?)";
-                    PreparedStatement userRoleStatement = connection.prepareStatement(userRoleQuery);
-                    userRoleStatement.setInt(1, userId);
-                    userRoleStatement.setInt(2, roleId);
-                    userRoleStatement.executeUpdate();
+            if (update
+                    == false) {
+                // Insérer l'utilisateur dans la table utilisateur
+                query = "INSERT INTO user (username, email, password, is_active) VALUES (?, ?, ?, ?)";
+                preparedStatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+                preparedStatement.setString(1, username);
+                preparedStatement.setString(2, email);
+                preparedStatement.setString(3, password);
+                preparedStatement.setBoolean(4, isActive);
+                preparedStatement.executeUpdate();
+
+                // Obtenir l'ID du nouvel utilisateur inséré
+                ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    userId = generatedKeys.getInt(1);
                 } else {
-                    // Mettre à jour l'utilisateur dans la table utilisateur
-                    query = "UPDATE user SET username=?, email=?, password=?, is_active=? WHERE id=?";
-                    preparedStatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
-                    preparedStatement.setString(1, username);
-                    preparedStatement.setString(2, email);
-                    preparedStatement.setString(3, encodedPassword);
-                    preparedStatement.setBoolean(4, isActive);
-                    preparedStatement.setInt(5, userId);
-                    preparedStatement.executeUpdate();
-
-                    // Insérer le rôle utilisateur dans la table user_role
-                    String userRoleQuery = "INSERT INTO user_role (user_id, role_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE role_id=?";
-                    PreparedStatement userRoleStatement = connection.prepareStatement(userRoleQuery);
-                    userRoleStatement.setInt(1, userId);
-                    userRoleStatement.setInt(2, roleId);
-                    userRoleStatement.setInt(3, roleId);
-                    userRoleStatement.executeUpdate();
+                    throw new SQLException("Failed to insert user, no ID obtained.");
                 }
 
-               
+                // Insérer le rôle utilisateur dans la table user_role
+                String userRoleQuery = "INSERT INTO user_role (user_id, role_id) VALUES (?, ?)";
+                PreparedStatement userRoleStatement = connection.prepareStatement(userRoleQuery);
+                userRoleStatement.setInt(1, userId);
+                userRoleStatement.setInt(2, roleId);
+                userRoleStatement.executeUpdate();
+            } else {
+                // Mettre à jour l'utilisateur dans la table utilisateur
+                query = "UPDATE user SET username=?, email=?, password=?, is_active=? WHERE id=?";
+                preparedStatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+                preparedStatement.setString(1, username);
+                preparedStatement.setString(2, email);
+                preparedStatement.setString(3, passwordFld.getText());
+                //preparedStatement.setString(3, encodedPassword);
+                preparedStatement.setBoolean(4, isActive);
+                preparedStatement.setInt(5, userId);
+                preparedStatement.executeUpdate();
 
-            } catch (SQLException ex) {
-                Logger.getLogger(AddUserViewController.class.getName()).log(Level.SEVERE, null, ex);
+                // Insérer le rôle utilisateur dans la table user_role
+                String userRoleQuery = "INSERT INTO user_role (user_id, role_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE role_id=?";
+                PreparedStatement userRoleStatement = connection.prepareStatement(userRoleQuery);
+                userRoleStatement.setInt(1, userId);
+                userRoleStatement.setInt(2, roleId);
+                userRoleStatement.setInt(3, roleId);
+                userRoleStatement.executeUpdate();
             }
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/tn/esprit/GUI/UserView.fxml"));
-            Parent root = loader.load();
-            Scene scene = new Scene(root);
-            Stage primaryStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            primaryStage.setScene(scene);
-            primaryStage.show();
-
         }
+        catch (SQLException ex) {
+                Logger.getLogger(AddUserViewController.class
+
+.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        stage.close();
+
+        FXMLUtils fxmlUtils = new FXMLUtils();
+        fxmlUtils.loadFXML("/tn/esprit/GUI/AddUserView.fxml", "tn/esprit/Service/AddUserViewController");
 
     }
 
-    @FXML
-    private void cancel(MouseEvent event) throws IOException {
+}
+
+@FXML
+        private void cancel(MouseEvent event) throws IOException {
         //usernameFld.setText(null);
 
-        // Stage stage = (Stage)((Node) event.getSource()).getScene().getWindow();
-        //  stage.close();
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/tn/esprit/GUI/UserView.fxml"));
-        Parent root = loader.load();
-        Scene scene = new Scene(root);
-        Stage primaryStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        primaryStage.setScene(scene);
-        primaryStage.show();
-
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        stage.close();
+        /*UserViewController userViewController= new UserViewController();
+        userViewController.refresh();*/
     }
 
     private void getQuery() {
@@ -274,4 +282,5 @@ public class AddUserViewController implements Initializable {
     void setUpdate(boolean b) {
         this.update = b;
     }
+
 }

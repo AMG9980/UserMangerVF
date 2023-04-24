@@ -5,9 +5,13 @@
  */
 package tn.esprit.Service;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Transport;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import java.io.IOException;
+
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
@@ -27,13 +31,18 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
+import javafx.print.PageLayout;
+import javafx.print.PageOrientation;
+import javafx.print.Paper;
+import javafx.print.Printer;
+import javafx.print.PrinterJob;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Pagination;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -43,13 +52,40 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.AnchorPane;
+
 import tn.esprit.Entities.Role;
 import tn.esprit.Entities.User;
+import tn.esprit.Entities.FXMLUtils;
 import tn.esprit.Entities.MyClassIcon;
 import tn.esprit.Tools.DbConnect;
 
+import java.util.Properties;
+import javafx.event.ActionEvent;
+import javafx.scene.Node;
+import javafx.scene.control.TextInputDialog;
+/*
+import javax.mail.Transport;
+import javax.mail.Authenticator;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+ */
+import javax.mail.Session;
+
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+
 public class UserViewController implements Initializable {
 
+    @FXML
+    private Button exitBtn;
+    @FXML
+    private Pagination pagination;
+    @FXML
+    private Button add;
+    @FXML
+    private AnchorPane contentPane;
     @FXML
     private TextField searchField;
     @FXML
@@ -71,7 +107,7 @@ public class UserViewController implements Initializable {
     private TableColumn<User, List<Role>> rolesColumn;
 
     @FXML
-    private TableColumn<User, User> editDeleteColumn;
+    private TableColumn<User, User> actionsColumn;
 
     @FXML
     private TableColumn<User, User> deleteColumn;
@@ -80,17 +116,54 @@ public class UserViewController implements Initializable {
     PreparedStatement preparedStatement = null;
     ResultSet resultSet = null;
     User user = null;
-
+    int pageSize = 5;
     ObservableList<User> userList = FXCollections.observableArrayList();
+    private String username;
     private String email;
+    private String password;
     private Boolean is_active;
 
     public void initialize(URL url, ResourceBundle rb) {
+        configurePagination();
         // Initialize the columns of the table
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         usernameColumn.setCellValueFactory(new PropertyValueFactory<>("username"));
         emailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
         isActiveColumn.setCellValueFactory(new PropertyValueFactory<>("isActive"));
+//
+        /*TableColumn<User, Boolean> isActiveColumn = new TableColumn<>("Active");
+isActiveColumn.setCellValueFactory(new PropertyValueFactory<>("isActive"));
+
+isActiveColumn.setCellFactory(column -> {
+    return new TableCell<User, Boolean>() {
+        private final CheckBox checkBox = new CheckBox();
+
+        {
+            checkBox.setOnAction(event -> {
+                User user = getTableView().getItems().get(getIndex());
+                // handle checkbox action, for example:
+                user.setActive(checkBox.isSelected());
+                getTableView().refresh();
+            });
+        }
+
+        @Override
+        protected void updateItem(Boolean item, boolean empty) {
+            super.updateItem(item, empty);
+
+            if (empty) {
+                setGraphic(null);
+            } else {
+                checkBox.setSelected(item);
+                setGraphic(checkBox);
+            }
+        }
+    };
+})
+
+userTableView.getColumns().add(isActiveColumn);
+
+         */
         rolesColumn.setCellValueFactory(new PropertyValueFactory<>("roles"));
 
         rolesColumn.setCellFactory(column -> new TableCell<User, List<Role>>() {
@@ -106,89 +179,129 @@ public class UserViewController implements Initializable {
         });
 
         // Add edit and delete buttons to each row
-        editDeleteColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
-editDeleteColumn.setCellFactory(param -> new TableCell<User, User>() {
-    MyClassIcon myClass = new MyClassIcon();
-    FontAwesomeIconView deleteIcon = myClass.getDeleteIcon();
-    FontAwesomeIconView editIcon = myClass.getEditIcon();
-    
-    @Override
-    protected void updateItem(User user, boolean empty) {
-        super.updateItem(user, empty);
-        
-        if (user == null) {
-            setGraphic(null);
-            return;
-        }
-        
-        HBox buttons = new HBox(editIcon, deleteIcon);
-        setGraphic(buttons);
-        
-        editIcon.setOnMouseClicked(event -> {
-            // Edit button action
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(getClass().getResource("/tn/esprit/GUI/AddUserView.fxml"));
-            try {
-                Parent root = loader.load();
-            } catch (IOException ex) {
-                Logger.getLogger(UserViewController.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        actionsColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
+        actionsColumn.setCellFactory(param -> new TableCell<User, User>() {
+            MyClassIcon myClass = new MyClassIcon();
+            FontAwesomeIconView deleteIcon = myClass.getDeleteIcon();
+            FontAwesomeIconView editIcon = myClass.getEditIcon();
+            FontAwesomeIconView mailIcon = myClass.getMailIcon();
+            FontAwesomeIconView banIcon = myClass.getBanIcon();
 
-            AddUserViewController addUserController = loader.getController();
-            addUserController.setUpdate(true);
-            addUserController.setTextField(user.getId(), user.getUsername(), user.getEmail(), /*getPassword(),*/ user.getIsActive());
-            /* user.getBirth().toLocalDate(),user.getAdress(), user.getEmail());*/
-            Parent parent = loader.getRoot();
-            Stage stage = new Stage();
-            stage.setScene(new Scene(parent));
-            stage.initStyle(StageStyle.UTILITY);
+            @Override
+            protected void updateItem(User user, boolean empty) {
+                super.updateItem(user, empty);
 
-            Stage currentStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            currentStage.close();
-
-            stage.show();
-        });
-        
-        deleteIcon.setOnMouseClicked(event -> {
-            // Delete button action
-            Alert alert = new Alert(AlertType.CONFIRMATION);
-            alert.setTitle("Delete User");
-            alert.setHeaderText("Are you sure you want to delete this user?");
-            alert.setContentText(user.getUsername());
-
-            Optional<ButtonType> result = alert.showAndWait();
-            if (result.isPresent() && result.get() == ButtonType.OK) {
-                try {
-                    connection = DbConnect.getConnect();
-                    String query = "DELETE FROM user WHERE id = ?";
-                    PreparedStatement preparedStatement = connection.prepareStatement(query);
-                    preparedStatement.setInt(1, user.getId());
-                    int rowsDeleted = preparedStatement.executeUpdate();
-                    if (rowsDeleted > 0) {
-                        userList.remove(user);
-                        Alert alertSuccess = new Alert(AlertType.INFORMATION);
-                        alertSuccess.setTitle("Delete User");
-                        alertSuccess.setHeaderText(null);
-                        alertSuccess.setContentText("User has been deleted successfully!");
-                        alertSuccess.showAndWait();
-                    }
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                    Alert alertError = new Alert(AlertType.ERROR);
-                    alertError.setTitle("Delete User");
-                    alertError.setHeaderText(null);
-                    alertError.setContentText("An error occurred while deleting the user. Please try again later.");
-                    alertError.showAndWait();
+                if (user == null) {
+                    setGraphic(null);
+                    return;
                 }
-            }
-        });
-    }
-});
 
+                HBox buttons = new HBox(banIcon, mailIcon, editIcon, deleteIcon);
+                setGraphic(buttons);
+
+                editIcon.setOnMouseClicked(event -> {
+                    // Edit button action
+                    FXMLLoader loader = new FXMLLoader();
+                    loader.setLocation(getClass().getResource("/tn/esprit/GUI/AddUserView.fxml"));
+                    try {
+                        Parent root = loader.load();
+                    } catch (IOException ex) {
+                        Logger.getLogger(UserViewController.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                    AddUserViewController addUserController = loader.getController();
+                    addUserController.setUpdate(true);
+                    addUserController.setTextField(user.getId(), user.getUsername(), user.getEmail(), /*getPassword(),*/ user.getIsActive());
+
+                    Parent parent = loader.getRoot();
+                    Stage stage = new Stage();
+                    stage.setScene(new Scene(parent));
+                    stage.initStyle(StageStyle.UTILITY);
+
+                    /* Stage currentStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                    currentStage.close();*/
+                    stage.show();
+                });
+
+                deleteIcon.setOnMouseClicked(event -> {
+                    // Delete button action
+                    Alert alert = new Alert(AlertType.CONFIRMATION);
+                    alert.setTitle("Delete User");
+                    alert.setHeaderText("Are you sure you want to delete this user?");
+                    alert.setContentText(user.getUsername());
+
+                    Optional<ButtonType> result = alert.showAndWait();
+                    if (result.isPresent() && result.get() == ButtonType.OK) {
+                        try {
+                            connection = DbConnect.getConnect();
+                            String query = "DELETE FROM user WHERE id = ?";
+                            PreparedStatement preparedStatement = connection.prepareStatement(query);
+                            preparedStatement.setInt(1, user.getId());
+                            int rowsDeleted = preparedStatement.executeUpdate();
+                            if (rowsDeleted > 0) {
+                                userList.remove(user);
+                                Alert alertSuccess = new Alert(AlertType.INFORMATION);
+                                alertSuccess.setTitle("Delete User");
+                                alertSuccess.setHeaderText(null);
+                                alertSuccess.setContentText("User has been deleted successfully!");
+                                alertSuccess.showAndWait();
+                            }
+                        } catch (SQLException ex) {
+                            ex.printStackTrace();
+                            Alert alertError = new Alert(AlertType.ERROR);
+                            alertError.setTitle("Delete User");
+                            alertError.setHeaderText(null);
+                            alertError.setContentText("An error occurred while deleting the user. Please try again later.");
+                            alertError.showAndWait();
+                        }
+                    }
+                });
+
+                //sending Mail
+                mailIcon.setOnMouseClicked(event -> {
+
+                    Alert alert = new Alert(AlertType.CONFIRMATION);
+                    alert.setTitle("Send Email");
+                    alert.setHeaderText("Are you sure you want to send an email to this user?");
+                    alert.setContentText(user.getUsername());
+
+                    Optional<ButtonType> result = alert.showAndWait();
+                    if (result.isPresent() && result.get() == ButtonType.OK) {
+                        String recipient = user.getEmail();
+
+                        // Show dialog to get subject text
+                        TextInputDialog dialog = new TextInputDialog();
+                        dialog.setContentText("Please enter the email subject:");
+                        TextField textField = dialog.getEditor();
+                        System.out.println(textField);
+// Définir la largeur du champ de saisie
+                        textField.setPrefWidth(400);
+
+// Définir la hauteur du champ de saisie
+                        textField.setPrefHeight(200);
+
+                        Optional<String> subjectResult = dialog.showAndWait();
+
+                        // Check if subject text was entered
+                        if (subjectResult.isPresent()) {
+                            String subject = subjectResult.get();
+                            String body = "Username: " + user.getUsername() + "\nEmail: " + user.getEmail();
+                            sendEmail(recipient, subject, body);
+                        }
+                    }
+                }
+                );
+
+                // fin sending mail 
+            }
+
+        }
+        );
 
         // Populate the table with data
         try {
-            ObservableList<User> userList = FXCollections.observableArrayList(UserViewController.getUsers());
+            List<User> users = UserViewController.getUsers();
+            userList = FXCollections.observableArrayList(users);
             userTableView.setItems(userList);
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -196,12 +309,73 @@ editDeleteColumn.setCellFactory(param -> new TableCell<User, User>() {
 
     }
 
+    private void sendEmail(String recipient, String subject, String body) {
+        // final String username = "gmohsen6@gmail.com";
+        //final String password = "ydljogkacxatuszj";
+        String from = "gmohsen6@gmail.com";
+        String password = "ydljogkacxatuszj"; // replace with your email password
+
+        // Get the session object
+        Properties props = new Properties();
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        Session session = Session.getInstance(props, new javax.mail.Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(from, password);
+            }
+        });
+
+        try {
+            // Create a default MimeMessage object
+            MimeMessage message = new MimeMessage(session);
+
+            // Set From: header field of the header.
+            message.setFrom(new InternetAddress(from));
+
+            // Set To: header field of the header.
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient));
+
+            // Set Subject: header field
+            message.setSubject(subject);
+
+            // Now set the actual message
+            message.setText(body);
+
+            // Send message
+            Transport.send(message);
+            System.out.println("Sent message successfully....");
+        } catch (MessagingException mex) {
+            mex.printStackTrace();
+        }
+    }
+
+    private void configurePagination() {
+        pagination.setPageFactory(pageIndex -> {
+            int fromIndex = pageIndex * pageSize;
+            int toIndex = Math.min(fromIndex + pageSize, userList.size());
+            List<User> subList = userList.subList(fromIndex, toIndex);
+            ObservableList<User> observableSubList = FXCollections.observableArrayList(subList);
+            userTableView.setItems(observableSubList);
+            updatePageCount();
+            return userTableView;
+        });
+        pagination.setMaxPageIndicatorCount(5);
+        updatePageCount();
+    }
+
+    private void updatePageCount() {
+        int pageCount = (int) Math.ceil((double) userList.size() / pageSize);
+        pagination.setPageCount(pageCount);
+    }
+
     public static List<User> getUsers() throws SQLException {
         List<User> userList = new ArrayList<>();
 
         try (Connection connection = DbConnect.getConnect();
                 PreparedStatement stmt = connection.prepareStatement(
-                        "SELECT u.id, u.username, u.email, u.is_active, r.id as role_id, r.nom as role_name "
+                        "SELECT u.id, u.username, u.email, u.password, u.is_active, r.id as role_id, r.nom as role_name "
                         + "FROM user u "
                         + "JOIN user_role ur ON u.id = ur.user_id "
                         + "JOIN role r ON ur.role_id = r.id")) {
@@ -211,13 +385,14 @@ editDeleteColumn.setCellFactory(param -> new TableCell<User, User>() {
                     int userId = rs.getInt("id");
                     String username = rs.getString("username");
                     String email = rs.getString("email");
+                    String password = rs.getString("password");
                     boolean isActive = rs.getBoolean("is_active");
                     int roleId = rs.getInt("role_id");
                     String roleName = rs.getString("role_name");
 
                     User user = userList.stream().filter(u -> u.getId() == userId).findFirst().orElse(null);
                     if (user == null) {
-                        user = new User(userId, username, email, isActive);
+                        user = new User(userId, username, email, password, isActive);
                         userList.add(user);
                     }
 
@@ -250,7 +425,7 @@ editDeleteColumn.setCellFactory(param -> new TableCell<User, User>() {
                         resultSet.getInt("id"),
                         resultSet.getString("username"),
                         resultSet.getString("email"),
-                        //resultSet.getString("password"),
+                        resultSet.getString("password"),
                         resultSet.getBoolean("is_active")
                 ));
 
@@ -259,12 +434,13 @@ editDeleteColumn.setCellFactory(param -> new TableCell<User, User>() {
             userTableView.setItems(userList);
 
         } catch (SQLException ex) {
-            Logger.getLogger(UserViewController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(UserViewController.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     @FXML
-    public void refreshTable(MouseEvent event) {
+    public void refresh(MouseEvent event) {
         try {
             ObservableList<User> userList = FXCollections.observableArrayList(UserViewController.getUsers());
             userTableView.setItems(userList);
@@ -274,23 +450,36 @@ editDeleteColumn.setCellFactory(param -> new TableCell<User, User>() {
     }
 
     @FXML
-    private void getAddView(MouseEvent event) {
+    private void getAddView(MouseEvent event) throws Exception {
 
-        try {
-            Parent parent = FXMLLoader.load(getClass().getResource("/tn/esprit/GUI/AddUserView.fxml"));
-            Scene scene = new Scene(parent);
-            Stage stage = new Stage();
-            stage.setScene(scene);
-            stage.initStyle(StageStyle.UTILITY);
-
-            Stage currentStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            currentStage.close();
-
-            stage.show();
-        } catch (IOException ex) {
-            Logger.getLogger(UserViewController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        FXMLUtils fxmlUtils = new FXMLUtils();
+        fxmlUtils.loadFXML("/tn/esprit/GUI/AddUserView.fxml", "tn/esprit/Service/AddUserViewController");
 
     }
 
+    @FXML
+    private void print(MouseEvent event) {
+
+        Printer printer = Printer.getDefaultPrinter();
+        PageLayout pageLayout = printer.createPageLayout(Paper.NA_LETTER, PageOrientation.PORTRAIT, Printer.MarginType.DEFAULT);
+        TableView tableView = new TableView();
+        // Add columns and data to your table view
+        // ...
+        tableView.getColumns().addAll();
+        tableView.setItems(userList);
+        tableView.autosize();
+        tableView.setMaxWidth(Double.MAX_VALUE);
+        tableView.setMaxHeight(Double.MAX_VALUE);
+        // Print the table view
+        PrinterJob job = PrinterJob.createPrinterJob();
+        if (job != null) {
+            boolean success = job.printPage(pageLayout, tableView);
+            if (success) {
+                job.endJob();
+            }
+        }
+    }
+
+    // Handle the logout event
+    
 }

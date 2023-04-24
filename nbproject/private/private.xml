@@ -5,8 +5,12 @@
         <group>
             <file>file:/C:/Users/win%2010/Desktop/UserManagerDesk2/src/tn/esprit/GUI/UserView.fxml</file>
             <file>file:/C:/Users/win%2010/Desktop/UserManagerDesk2/src/tn/esprit/Service/UserViewController.java</file>
-            <file>file:/C:/Users/win%2010/Desktop/UserManagerDesk2/src/tn/esprit/Service/RoleViewController.java</file>
-            <file>file:/C:/Users/win%2010/Desktop/UserManagerDesk2/src/tn/esprit/Entities/MyClassIcon.java</file>
+            <file>file:/C:/Users/win%2010/Desktop/UserManagerDesk2/src/tn/esprit/GUI/smb.fxml</file>
+            <file>file:/C:/Users/win%2010/Desktop/UserManagerDesk2/src/tn/esprit/Service/SmbController.java</file>
+            <file>file:/C:/Users/win%2010/Desktop/UserManagerDesk2/src/tn/esprit/Service/AddUserViewController.java</file>
+            <file>file:/C:/Users/win%2010/Desktop/UserManagerDesk2/src/tn/esprit/Service/LoginController.java</file>
+            <file>file:/C:/Users/win%2010/Desktop/UserManagerDesk2/src/tn/esprit/GUI/Login.fxml</file>
+            <file>file:/C:/Users/win%2010/Desktop/UserManagerDesk2/src/tn/esprit/Service/RegisterController.java</file>
         </group>
     </open-files>
 </project-private>

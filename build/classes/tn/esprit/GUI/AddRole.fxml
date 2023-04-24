@@ -11,7 +11,7 @@
 <AnchorPane id="AnchorPane" prefHeight="321.0" prefWidth="355.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.Service.AddRoleController">
     <children>
        
-        <Label layoutX="20.0" layoutY="21.0" text="Add Role" textFill="DARKTURQUOISE">
+        <Label layoutX="20.0" layoutY="21.0" text="Add/Update Role" textFill="DARKTURQUOISE">
             <font>
                 <Font name="Verdana" size="32.0" />
             </font>
@@ -39,6 +39,7 @@
                 <Font name="Verdana" size="16.0" />
             </font>
         </TextField>
-        <Separator layoutY="74.0" prefHeight="8.0" prefWidth="355.0" />
+        <Separator layoutX="-6.0" layoutY="109.0" prefHeight="8.0" prefWidth="355.0" />
+      <Label id="AddOrUpadate" fx:id="text1" layoutX="39.0" layoutY="67.0" prefHeight="30.0" prefWidth="171.0" text="Label" />
     </children>
 </AnchorPane>

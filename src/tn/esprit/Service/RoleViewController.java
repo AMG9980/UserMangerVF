@@ -34,6 +34,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
 import javafx.scene.control.Pagination;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -45,9 +46,11 @@ import javafx.stage.StageStyle;
 import javafx.util.Callback;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Color;
+import tn.esprit.Entities.FXMLUtils;
 import tn.esprit.Entities.Role;
 import tn.esprit.Tools.DbConnect;
-import tn.esprit.Service.*;
 
 public class RoleViewController implements Initializable {
 
@@ -61,12 +64,7 @@ public class RoleViewController implements Initializable {
     private TableColumn<Role, String> idCol;
     @FXML
     private TableColumn<Role, String> nomCol;
-    /*@FXML
-    private TableColumn<Role, String> birthCol;
-    @FXML
-    private TableColumn<Role, String> adressCol;
-    @FXML
-    private TableColumn<Role, String> emailCol;*/
+   
     @FXML
     private TableColumn<Role, String> editCol;
 
@@ -79,21 +77,25 @@ public class RoleViewController implements Initializable {
     ObservableList<Role> RoleList = FXCollections.observableArrayList();
 
     int pageSize = 5;
+    @FXML
+     private Label text1;
+   
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        //configurePagination();
+       configurePagination();
         loadDate();
+        
     }
 
-    /*private void configurePagination() {
+    private void configurePagination() {
     pagination.setPageFactory(pageIndex -> {
         int fromIndex = pageIndex * pageSize;
         int toIndex = Math.min(fromIndex + pageSize, RoleList.size());
         rolesTable.setItems(FXCollections.observableArrayList(RoleList.subList(fromIndex, toIndex)));
         updatePageCount(); // Mise à jour du nombre de pages
         return rolesTable;
-    })
+    });
     pagination.setMaxPageIndicatorCount(5); // Définir le nombre de pages maximum à afficher
     updatePageCount(); // Mise à jour du nombre de pages
 }
@@ -101,7 +103,7 @@ public class RoleViewController implements Initializable {
     private void updatePageCount() {
         int pageCount = (int) Math.ceil((double) RoleList.size() / pageSize);
         pagination.setPageCount(pageCount);
-    }*/
+    }
     @FXML
     private void close(MouseEvent event) {
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -109,22 +111,29 @@ public class RoleViewController implements Initializable {
     }
 
     @FXML
-    private void getAddView(MouseEvent event) {
+    
+    private void getAddView(MouseEvent event) throws Exception {
+        
+        FXMLUtils fxmlUtils = new FXMLUtils();
+        fxmlUtils.loadFXML("/tn/esprit/GUI/AddRole.fxml", "tn/esprit/Service/AddRoleController");
+        
+       
 
-        try {
+       
+        /*try {
             Parent parent = FXMLLoader.load(getClass().getResource("/tn/esprit/GUI/AddRole.fxml"));
             Scene scene = new Scene(parent);
             Stage stage = new Stage();
             stage.setScene(scene);
             stage.initStyle(StageStyle.UTILITY);
-
+            /*
             Stage currentStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             currentStage.close();
 
             stage.show();
         } catch (IOException ex) {
             Logger.getLogger(RoleViewController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        }*/
 
     }
 
@@ -178,6 +187,7 @@ public class RoleViewController implements Initializable {
 
     @FXML
     private void print(MouseEvent event) {
+        
         Printer printer = Printer.getDefaultPrinter();
         PageLayout pageLayout = printer.createPageLayout(Paper.NA_LETTER, PageOrientation.PORTRAIT, Printer.MarginType.DEFAULT);
         TableView tableView = new TableView();
@@ -205,7 +215,6 @@ public class RoleViewController implements Initializable {
 
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
         nomCol.setCellValueFactory(new PropertyValueFactory<>("nom"));
-
 
         //add cell of button edit 
         Callback<TableColumn<Role, String>, TableCell<Role, String>> cellFoctory = (TableColumn<Role, String> param) -> {
@@ -274,8 +283,8 @@ public class RoleViewController implements Initializable {
                             stage.setScene(new Scene(parent));
                             stage.initStyle(StageStyle.UTILITY);
 
-                            Stage currentStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                            currentStage.close();
+                            //Stage currentStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                           // currentStage.close();
 
                             stage.show();
 

@@ -12,14 +12,17 @@ public class User {
 
     private int id;
     private String username;
+
     private String email;
+    private String password;
     private boolean isActive;
     private List<Role> roles;
 
-    public User(int id, String username, String email, boolean isActive) {
+    public User(int id, String username, String email, String password, boolean isActive) {
         this.id = id;
         this.username = username;
         this.email = email;
+        this.password = password;
         this.isActive = isActive;
         this.roles = new ArrayList<>();
     }
@@ -42,6 +45,14 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public boolean getIsActive() {
