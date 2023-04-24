@@ -312,8 +312,8 @@ userTableView.getColumns().add(isActiveColumn);
     private void sendEmail(String recipient, String subject, String body) {
         // final String username = "gmohsen6@gmail.com";
         //final String password = "ydljogkacxatuszj";
-        String from = "gmohsen6@gmail.com";
-        String password = "ydljogkacxatuszj"; // replace with your email password
+        String from = "amine.gharbi.1@esprit.tn";
+        String password = "colhhjhazqitkyep"; // replace with your email password
 
         // Get the session object
         Properties props = new Properties();
