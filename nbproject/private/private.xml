@@ -3,9 +3,19 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+<<<<<<< HEAD
             <file>file:/C:/Users/win%2010/Desktop/UserManagerDesk2/src/tn/esprit/Service/UserViewController.java</file>
             <file>file:/C:/Users/win%2010/Desktop/UserManagerDesk2/src/tn/esprit/Service/UpdateUserController.java</file>
             <file>file:/C:/Users/win%2010/Desktop/UserManagerDesk2/src/tn/esprit/Entities/MyClassIcon.java</file>
+=======
+            <file>file:/C:/Users/DELL/Desktop/UserMangerVF/nbproject/jfx-impl.xml</file>
+            <file>file:/C:/Users/DELL/Desktop/UserMangerVF/src/tn/esprit/Service/RoleViewController.java</file>
+            <file>file:/C:/Users/DELL/Desktop/UserMangerVF/src/tn/esprit/Service/UpdateRoleController.java</file>
+            <file>file:/C:/Users/DELL/Desktop/UserMangerVF/src/tn/esprit/Service/SmbController.java</file>
+            <file>file:/C:/Users/DELL/Desktop/UserMangerVF/src/tn/esprit/Entities/MyClassIcon.java</file>
+            <file>file:/C:/Users/DELL/Desktop/UserMangerVF/src/tn/esprit/Service/UserViewController.java</file>
+            <file>file:/C:/Users/DELL/Desktop/UserMangerVF/src/tn/esprit/Service/RegisterController.java</file>
+>>>>>>> 68b3fcad87bd0ee8574bd0157eb026cd4680489c
         </group>
     </open-files>
 </project-private>
