@@ -61,8 +61,7 @@ import tn.esprit.Entities.MyClassIcon;
 import tn.esprit.Tools.DbConnect;
 
 import java.util.Properties;
-import javafx.event.ActionEvent;
-import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextInputDialog;
 /*
 import javax.mail.Transport;
@@ -196,22 +195,23 @@ userTableView.getColumns().add(isActiveColumn);
                     return;
                 }
 
-                HBox buttons = new HBox(banIcon, mailIcon, editIcon, deleteIcon);
+                HBox buttons = new HBox(5, banIcon, new Label(" "), mailIcon, new Label(" "), editIcon, new Label(" "), deleteIcon);
+
                 setGraphic(buttons);
 
                 editIcon.setOnMouseClicked(event -> {
                     // Edit button action
                     FXMLLoader loader = new FXMLLoader();
-                    loader.setLocation(getClass().getResource("/tn/esprit/GUI/AddUserView.fxml"));
+                    loader.setLocation(getClass().getResource("/tn/esprit/GUI/UpdateUser.fxml"));
                     try {
                         Parent root = loader.load();
                     } catch (IOException ex) {
                         Logger.getLogger(UserViewController.class.getName()).log(Level.SEVERE, null, ex);
                     }
 
-                    AddUserViewController addUserController = loader.getController();
-                    addUserController.setUpdate(true);
-                    addUserController.setTextField(user.getId(), user.getUsername(), user.getEmail(), /*getPassword(),*/ user.getIsActive());
+                    UpdateUserController updateUserController = loader.getController();
+                    updateUserController.setUpdate(true);
+                    updateUserController.setTextField(user.getId(), user.getUsername(), user.getEmail(), /*getPassword(),*/ user.getIsActive());
 
                     Parent parent = loader.getRoot();
                     Stage stage = new Stage();
@@ -255,6 +255,30 @@ userTableView.getColumns().add(isActiveColumn);
                             alertError.showAndWait();
                         }
                     }
+                });
+// block unser
+                banIcon.setOnMouseClicked(event -> {
+
+                    try {
+
+                        String query;
+
+                        query = "UPDATE user SET is_active = !user.is_active WHERE id = ?";
+
+                        connection = DbConnect.getConnect();
+                        PreparedStatement preparedStatement = connection.prepareStatement(query);
+                        preparedStatement.setInt(1, user.getId());
+                        int rowsDeleted = preparedStatement.executeUpdate();
+
+                    } catch (SQLException ex) {
+                        ex.printStackTrace();
+                        Alert alertError = new Alert(AlertType.ERROR);
+                        alertError.setTitle("Update User");
+                        alertError.setHeaderText(null);
+                        alertError.setContentText("An error occurred while updating  the user. Please try again later.");
+                        alertError.showAndWait();
+                    }
+
                 });
 
                 //sending Mail
@@ -313,7 +337,7 @@ userTableView.getColumns().add(isActiveColumn);
         // final String username = "gmohsen6@gmail.com";
         //final String password = "ydljogkacxatuszj";
         String from = "gmohsen6@gmail.com";
-        String password = "ydljogkacxatuszj"; // replace with your email password
+        String password = "gzegzcumhcgazugf"; // replace with your email password
 
         // Get the session object
         Properties props = new Properties();
@@ -481,5 +505,4 @@ userTableView.getColumns().add(isActiveColumn);
     }
 
     // Handle the logout event
-    
 }

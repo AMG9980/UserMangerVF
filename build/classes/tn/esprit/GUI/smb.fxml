@@ -10,7 +10,7 @@
          <children>
             <Button fx:id="exitBtn" layoutX="696.0" layoutY="16.0" mnemonicParsing="false" onMouseClicked="#logOut" text="exit" />
          </children></AnchorPane>
-        <AnchorPane fx:id="sidebarPane" layoutX="1.0" layoutY="51.0" prefHeight="429.0" prefWidth="200.0" style="-fx-background-color: #00ff80;">
+        <AnchorPane fx:id="sidebarPane" layoutX="1.0" layoutY="51.0" prefHeight="429.0" prefWidth="200.0" style="-fx-background-color: #7C7272;">
             <children>
                 <Button layoutX="29.0" layoutY="27.0" mnemonicParsing="false" onAction="#UsersManagement" prefHeight="25.0" prefWidth="125.0" text="Users Management" />
                 <Button layoutX="29.0" layoutY="73.0" mnemonicParsing="false" onAction="#RolesManagement" prefHeight="25.0" prefWidth="125.0" text="Roles Management" />

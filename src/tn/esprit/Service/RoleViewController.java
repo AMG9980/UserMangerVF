@@ -150,9 +150,7 @@ public class RoleViewController implements Initializable {
                 RoleList.add(new Role(
                         resultSet.getInt("id"),
                         resultSet.getString("nom")));
-                /* resultSet.getDate("birth"),
-                        resultSet.getString("adress"),
-                        resultSet.getString("email")));*/
+                
                 rolesTable.setItems(RoleList);
 
             }
