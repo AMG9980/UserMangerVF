@@ -73,7 +73,7 @@ public class LoginController {
             switch (role) {
                 case "Admin":
                     // Rediriger vers la page smb.fxml en cas de succès
-                    Parent root = FXMLLoader.load(getClass().getResource("/tn/esprit/GUI/smb.fxml"));
+                    Parent root = FXMLLoader.load(getClass().getResource("/com/carte/gui/back/MainWindow.fxml"));
                     Scene scene = new Scene(root);
                     Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                     stage.setScene(scene);
@@ -82,7 +82,7 @@ public class LoginController {
                     break;
                 case "User":
                     // Rediriger vers la page Profil.fxml en cas de succès
-                    Parent root2 = FXMLLoader.load(getClass().getResource("/tn/esprit/GUI/Profil.fxml"));
+                    Parent root2 = FXMLLoader.load(getClass().getResource("/com/carte/gui/front/MainWindow.fxml"));
                     Scene scene2 = new Scene(root2);
                     Stage stage2 = (Stage) ((Node) event.getSource()).getScene().getWindow();
                     stage2.setScene(scene2);

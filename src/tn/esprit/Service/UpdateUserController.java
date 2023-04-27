@@ -89,7 +89,6 @@ public class UpdateUserController implements Initializable {
             Logger.getLogger(AddUserViewController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
     @FXML
 
     private void save(MouseEvent event) throws IOException, Exception {
@@ -100,10 +99,13 @@ public class UpdateUserController implements Initializable {
         String email = emailFld.getText();
         String password = passwordFld.getText();
         String roleName = roleComboBox.getValue();
+        
         boolean isActive = isActiveFld.isSelected();
-        System.out.print(roleId);
+        
+        System.out.print(userId);
 
-        if (username.isEmpty() || email.isEmpty() || password.isEmpty() || roleName == null) {
+       if (username.isEmpty() || email.isEmpty() || password.isEmpty() || roleName == null) {
+
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setHeaderText(null);
             alert.setContentText("Please Fill All DATA");
@@ -117,6 +119,7 @@ public class UpdateUserController implements Initializable {
                 ResultSet roleResult = roleStatement.executeQuery();
                 if (roleResult.next()) {
                     roleId = roleResult.getInt("id");
+                    //roleName = roleResult.getNom("nom");
                 } else {
                     throw new SQLException("Role not found: " + roleName);
                 }
@@ -159,19 +162,13 @@ public class UpdateUserController implements Initializable {
                 preparedStatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
                 preparedStatement.setString(1, username);
                 preparedStatement.setString(2, email);
-                preparedStatement.setString(3, passwordFld.getText());
+                preparedStatement.setString(3, password);
                 //preparedStatement.setString(3, encodedPassword);
                 preparedStatement.setBoolean(4, isActive);
                 preparedStatement.setInt(5, userId);
                 preparedStatement.executeUpdate();
 
-               /* // Insérer le rôle utilisateur dans la table user_role
-                String userRoleQuery = "INSERT INTO user_role (user_id, role_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE role_id=?";
-                PreparedStatement userRoleStatement = connection.prepareStatement(userRoleQuery);
-                userRoleStatement.setInt(1, userId);
-                userRoleStatement.setInt(2, roleId);
-                userRoleStatement.setInt(3, roleId);
-                userRoleStatement.executeUpdate();*/
+              
             
 
         }
@@ -184,8 +181,8 @@ public class UpdateUserController implements Initializable {
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         stage.close();
 
-        FXMLUtils fxmlUtils = new FXMLUtils();
-        fxmlUtils.loadFXML("/tn/esprit/GUI/AddUserView.fxml", "tn/esprit/Service/AddUserViewController");
+        //FXMLUtils fxmlUtils = new FXMLUtils();
+       // fxmlUtils.loadFXML("/tn/esprit/GUI/UserView.fxml", "tn/esprit/Service/UserViewController");
 
     }
 
@@ -244,14 +241,16 @@ public class UpdateUserController implements Initializable {
 
     }
 
-    void setTextField(int id, String username, String email, /*String password, */ boolean isActive) {
-        // Set the values of the text fields in the Add User view
+    void setTextField(int id, String username, String email, String password, boolean isActive) {
+        //Set the values of the text fields in the Add User view
         //idFld.setText(Integer.toString(id));
+        userId=id;
         usernameFld.setText(username);
         emailFld.setText(email);
-        //passwordFld.setText(password);
+        passwordFld.setText(password);
         isActiveFld.setSelected(isActive);
-
+        //roleFld.setText(nom);
+      
     }
 
     void setUpdate(boolean b) {

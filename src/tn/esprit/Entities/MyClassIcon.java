@@ -1,7 +1,5 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ Classe pour faire apparaitre les icons FontAwesome dans la tableView
  */
 package tn.esprit.Entities;
 
@@ -14,7 +12,7 @@ public class MyClassIcon {
     private final FontAwesomeIconView deleteIcon = new FontAwesomeIconView(FontAwesomeIcon.TRASH);
     private final FontAwesomeIconView editIcon = new FontAwesomeIconView(FontAwesomeIcon.PENCIL_SQUARE);
     private final FontAwesomeIconView mailIcon = new FontAwesomeIconView(FontAwesomeIcon.ENVELOPE);
-    private final FontAwesomeIconView banIcon = new FontAwesomeIconView(FontAwesomeIcon.BAN);
+    private final FontAwesomeIconView userIcon = new FontAwesomeIconView(FontAwesomeIcon.USER);
     public MyClassIcon() {
         deleteIcon.setSize("30px");
         deleteIcon.setFill(Color.RED);
@@ -22,8 +20,8 @@ public class MyClassIcon {
         editIcon.setFill(Color.GREEN);
         mailIcon.setSize("30px");
         mailIcon.setFill(Color.BLUE);
-        banIcon.setSize("30px");
-        banIcon.setFill(Color.RED);
+        userIcon.setSize("30px");
+        userIcon.setFill(Color.RED);
     }
 
     public FontAwesomeIconView getDeleteIcon() {
@@ -39,7 +37,7 @@ public class MyClassIcon {
     }
     
      public FontAwesomeIconView getBanIcon() {
-        return banIcon;
+        return userIcon;
     }
 
     public void setDeleteIconSize(String size) {
@@ -54,7 +52,7 @@ public class MyClassIcon {
     }
 
      public void setBanIconSize(String size) {
-        banIcon.setSize(size);
+        userIcon.setSize(size);
     }
      
     public void setDeleteIconFill(Paint fill) {
@@ -70,7 +68,6 @@ public class MyClassIcon {
     }
     
     public void setBanIconFill(Paint fill) {
-        banIcon.setFill(fill);
+        userIcon.setFill(fill);
     }
 }
-

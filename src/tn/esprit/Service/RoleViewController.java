@@ -76,7 +76,7 @@ public class RoleViewController implements Initializable {
 
     ObservableList<Role> RoleList = FXCollections.observableArrayList();
 
-    int pageSize = 5;
+    int pageSize = 3;
     @FXML
      private Label text1;
    

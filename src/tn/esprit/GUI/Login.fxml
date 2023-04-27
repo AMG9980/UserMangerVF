@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" prefHeight="333.0" prefWidth="530.0" style="-fx-background-color: #FFFFFF;" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.Service.LoginController">
+<AnchorPane id="AnchorPane" prefHeight="333.0" prefWidth="559.0" style="-fx-background-color: #FFFFFF;" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.Service.LoginController">
     <children>
         <ImageView fx:id="ImageBank" fitHeight="283.0" fitWidth="240.0" layoutY="46.0" pickOnBounds="true" preserveRatio="true">
             <image>
@@ -20,13 +20,13 @@
          <font>
             <Font name="Book Antiqua" size="17.0" />
          </font></Label>
-        <TextField fx:id="emailField" layoutX="326.0" layoutY="159.0" prefHeight="25.0" prefWidth="170.0" promptText="Enter your email" />
+        <TextField fx:id="emailField" layoutX="326.0" layoutY="159.0" prefHeight="26.0" prefWidth="210.0" promptText="Enter your email" />
         <Label layoutX="240.0" layoutY="208.0" text="Password" textFill="CORNFLOWERBLUE">
          <font>
             <Font name="Book Antiqua" size="17.0" />
          </font></Label>
-        <PasswordField fx:id="passwordField" layoutX="326.0" layoutY="208.0" prefHeight="25.0" prefWidth="170.0" promptText="Enter your password" />
-        <Button fx:id="registerButton" onMouseClicked= "#getAddView" layoutX="314.0" layoutY="254.0" mnemonicParsing="false" prefHeight="32.0" prefWidth="66.0" style="-fx-background-color: #FF0000;" text="Register">
+        <PasswordField fx:id="passwordField" layoutX="326.0" layoutY="208.0" prefHeight="26.0" prefWidth="210.0" promptText="Enter your password" />
+        <Button fx:id="registerButton" layoutX="314.0" layoutY="254.0" mnemonicParsing="false" onMouseClicked="#getAddView" prefHeight="32.0" prefWidth="66.0" style="-fx-background-color: #FF0000;" text="Register">
          <font>
             <Font name="System Bold" size="12.0" />
          </font></Button>
@@ -36,7 +36,7 @@
                 <Font name="Bauhaus 93" size="45.0" />
             </font>
         </Label>
-      <Button fx:id="Login" onMouseClicked= "#handleLogin" layoutX="411.0" layoutY="254.0" mnemonicParsing="false" onAction="#handleLogin" prefHeight="32.0" prefWidth="66.0" style="-fx-background-color: #2ECC71;" text="Login">
+      <Button fx:id="Login" layoutX="411.0" layoutY="254.0" mnemonicParsing="false" onAction="#handleLogin" onMouseClicked="#handleLogin" prefHeight="32.0" prefWidth="66.0" style="-fx-background-color: #2ECC71;" text="Login">
          <font>
             <Font name="System Bold" size="12.0" />
          </font>

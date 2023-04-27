@@ -63,13 +63,8 @@ import tn.esprit.Tools.DbConnect;
 import java.util.Properties;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextInputDialog;
-/*
-import javax.mail.Transport;
-import javax.mail.Authenticator;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.PasswordAuthentication;
- */
+import javafx.scene.paint.Color;
+
 import javax.mail.Session;
 
 import javax.mail.internet.InternetAddress;
@@ -123,46 +118,30 @@ public class UserViewController implements Initializable {
     private Boolean is_active;
 
     public void initialize(URL url, ResourceBundle rb) {
+        dynRefresh();
         configurePagination();
         // Initialize the columns of the table
+        
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         usernameColumn.setCellValueFactory(new PropertyValueFactory<>("username"));
         emailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
         isActiveColumn.setCellValueFactory(new PropertyValueFactory<>("isActive"));
-//
-        /*TableColumn<User, Boolean> isActiveColumn = new TableColumn<>("Active");
-isActiveColumn.setCellValueFactory(new PropertyValueFactory<>("isActive"));
 
-isActiveColumn.setCellFactory(column -> {
-    return new TableCell<User, Boolean>() {
-        private final CheckBox checkBox = new CheckBox();
+        isActiveColumn.setCellFactory(column -> new TableCell<User, Boolean>() {
+            @Override
+            protected void updateItem(Boolean item, boolean empty) {
+                super.updateItem(item, empty);
 
-        {
-            checkBox.setOnAction(event -> {
-                User user = getTableView().getItems().get(getIndex());
-                // handle checkbox action, for example:
-                user.setActive(checkBox.isSelected());
-                getTableView().refresh();
-            });
-        }
-
-        @Override
-        protected void updateItem(Boolean item, boolean empty) {
-            super.updateItem(item, empty);
-
-            if (empty) {
-                setGraphic(null);
-            } else {
-                checkBox.setSelected(item);
-                setGraphic(checkBox);
+                if (item == null || empty) {
+                    setText(null);
+                    setStyle("");
+                } else {
+                    setText(item ? "Actif" : "Inactif");
+                    setStyle(item ? "-fx-text-fill: green;" : "-fx-text-fill: red;");
+                }
             }
-        }
-    };
-})
+        });
 
-userTableView.getColumns().add(isActiveColumn);
-
-         */
         rolesColumn.setCellValueFactory(new PropertyValueFactory<>("roles"));
 
         rolesColumn.setCellFactory(column -> new TableCell<User, List<Role>>() {
@@ -184,7 +163,7 @@ userTableView.getColumns().add(isActiveColumn);
             FontAwesomeIconView deleteIcon = myClass.getDeleteIcon();
             FontAwesomeIconView editIcon = myClass.getEditIcon();
             FontAwesomeIconView mailIcon = myClass.getMailIcon();
-            FontAwesomeIconView banIcon = myClass.getBanIcon();
+            FontAwesomeIconView userIcon = myClass.getBanIcon();
 
             @Override
             protected void updateItem(User user, boolean empty) {
@@ -195,7 +174,7 @@ userTableView.getColumns().add(isActiveColumn);
                     return;
                 }
 
-                HBox buttons = new HBox(5, banIcon, new Label(" "), mailIcon, new Label(" "), editIcon, new Label(" "), deleteIcon);
+                HBox buttons = new HBox(5, userIcon, new Label(" "), mailIcon, new Label(" "), editIcon, new Label(" "), deleteIcon);
 
                 setGraphic(buttons);
 
@@ -211,7 +190,7 @@ userTableView.getColumns().add(isActiveColumn);
 
                     UpdateUserController updateUserController = loader.getController();
                     updateUserController.setUpdate(true);
-                    updateUserController.setTextField(user.getId(), user.getUsername(), user.getEmail(), /*getPassword(),*/ user.getIsActive());
+                    updateUserController.setTextField(user.getId(), user.getUsername(), user.getEmail(), user.getPassword(), user.getIsActive());
 
                     Parent parent = loader.getRoot();
                     Stage stage = new Stage();
@@ -255,30 +234,35 @@ userTableView.getColumns().add(isActiveColumn);
                             alertError.showAndWait();
                         }
                     }
+                   dynRefresh();
                 });
 // block unser
-                banIcon.setOnMouseClicked(event -> {
+                // Set the initial color of the icon based on the isActive property
+                userIcon.setFill(user.getIsActive() ? Color.GREEN : Color.RED);
 
+                userIcon.setOnMouseClicked(event -> {
                     try {
-
-                        String query;
-
-                        query = "UPDATE user SET is_active = !user.is_active WHERE id = ?";
-
+                        String query = "UPDATE user SET is_active = !user.is_active WHERE id = ?";
                         connection = DbConnect.getConnect();
                         PreparedStatement preparedStatement = connection.prepareStatement(query);
                         preparedStatement.setInt(1, user.getId());
                         int rowsDeleted = preparedStatement.executeUpdate();
+
+                        // toggle the color of the icon
+                        if (userIcon.getFill().equals(Color.RED)) {
+                            userIcon.setFill(Color.GREEN);
+                        } else {
+                            userIcon.setFill(Color.RED);
+                        }
 
                     } catch (SQLException ex) {
                         ex.printStackTrace();
                         Alert alertError = new Alert(AlertType.ERROR);
                         alertError.setTitle("Update User");
                         alertError.setHeaderText(null);
-                        alertError.setContentText("An error occurred while updating  the user. Please try again later.");
+                        alertError.setContentText("An error occurred while updating the user. Please try again later.");
                         alertError.showAndWait();
                     }
-
                 });
 
                 //sending Mail
@@ -330,19 +314,18 @@ userTableView.getColumns().add(isActiveColumn);
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
-
+dynRefresh();
     }
 
     private void sendEmail(String recipient, String subject, String body) {
         // final String username = "gmohsen6@gmail.com";
         //final String password = "ydljogkacxatuszj";
-<<<<<<< HEAD
-        String from = "gmohsen6@gmail.com";
-        String password = "gzegzcumhcgazugf"; // replace with your email password
-=======
+        /**
+         * <<<<<<< HEAD String from = "gmohsen6@gmail.com"; String password =
+         * "gzegzcumhcgazugf"; // replace with your email password*
+         */
         String from = "amine.gharbi.1@esprit.tn";
         String password = "colhhjhazqitkyep"; // replace with your email password
->>>>>>> 68b3fcad87bd0ee8574bd0157eb026cd4680489c
 
         // Get the session object
         Properties props = new Properties();
@@ -478,6 +461,16 @@ userTableView.getColumns().add(isActiveColumn);
         }
     }
 
+    @FXML
+    public void dynRefresh() {
+        try {
+            ObservableList<User> userList = FXCollections.observableArrayList(UserViewController.getUsers());
+            userTableView.setItems(userList);
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+    
     @FXML
     private void getAddView(MouseEvent event) throws Exception {
 

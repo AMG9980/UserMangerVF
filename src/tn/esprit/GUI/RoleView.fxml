@@ -31,8 +31,8 @@
       <TableView id="rolesTable" fx:id="rolesTable" layoutX="31.0" layoutY="128.0" prefHeight="200.0" prefWidth="547.0">
          <columns>
             <TableColumn id="idCol" fx:id="idCol" prefWidth="75.0" text="Id" />
-            <TableColumn id="nomCol" fx:id="editCol" prefWidth="259.199951171875" text="Role" />
-            <TableColumn id="editCol" fx:id="nomCol" prefWidth="210.39996337890625" text="Actions" />
+            <TableColumn id="nomCol" fx:id="nomCol" prefWidth="259.199951171875" text="Role" />
+            <TableColumn id="editCol" fx:id="editCol" prefWidth="210.39996337890625" text="Actions" />
          </columns>
       </TableView>
     </children>
